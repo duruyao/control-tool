@@ -1,14 +1,13 @@
 import sys, os, signal
-import getopt, socket
-import threading
+import getopt, socket, threading
 
-host = socket.gethostbyname(socket.gethostname())
-port = 8080
+host = '127.0.0.1'  # socket.gethostbyname(socket.gethostname())
+port = 8090
 size = 4096 * 10
 msize = 0
 fsize = 0
-lisnum = 1  # how many ears to listen to client
-cmdinput = False  # if input command lines
+lisnum = 1          # how many ears to listen to client
+cmdinput = False    # if input command lines
 up = False
 down = False
 filename = ''
@@ -16,35 +15,25 @@ filename = ''
 
 def usage():
     """
-    ------------------------------------------------------------------------------------------------------
-    ## Syntax
-
-    python ser.py [-h <host>] [-p <port>] [-l <lisnum>] [-s <size>] [-c] [{-u <updest> | -d <downdest>}]
-    ------------------------------------------------------------------------------------------------------
-    ## Parameters
-
-    Parameters:     Descriptions:
-    -h --host       IPV4 for binding, default is [ 127.0.0.1 ]
-    -p --port       Port for binding, default is [ 8080 ]
-    -l --lisnum     Number of listening, default is  [ 1 ]
-    -s --size       Size of data for one TCP connection, default is  [ 4096 * 10 ]
-    -c --cmdinput   If input command lines, default is [ False ]
-    -u --updest     The destiantion of file to upload
-    -d --downdest   The destination of file to download
-    ------------------------------------------------------------------------------------------------------
-    ## Examples
-
-    > python ser.py -t 122.233.78.211 -p 8090 -l 5 -c
-
-    > python ser.py -t 127.0.0.1 -u E:/imgs/1024.png
-
-    > python ser.py -p 8070 -d /home/user/imgs/512.jpg
-    ------------------------------------------------------------------------------------------------------
+    Usage:      python2 ins.py [Flags] [Options]
+    Flags:  
+                -c --cmdinput   If input command lines, default is no.
+    Options:    
+                -h --host       IPV4 for binding, default is 127.0.0.1.
+                -p --port       Port for binding, default is 8080.
+                -l --lisnum     Number of listening, default is 1.
+                -s --size       Size of data for one TCP connection, default is 4096 * 10.
+                -u --updest     The destiantion of file to upload.
+                -d --downdest   The destination of file to download.
+    Examples:
+                python2 ins.py -h 122.233.78.211 -p 8090 -l 5 -c
+                python2 ins.py -h 127.0.0.1 -u E:/imgs/1024.png
+                python2 ins.py -p 8070 -d /home/user/imgs/512.jpg
     """
 
 
 def quit(signum, frame):
-    print '[*] Caught Ctrl C, Interrupt Program'
+    print '\n[*] Caught Ctrl_C, interrupt program'
     sys.exit()
 
 
@@ -62,13 +51,12 @@ def check_filename():
                         onetime = True
                     newfile = newfile + sign
                 filename = newfile[::-1]
-            print '[*] Exist the file of same name, and change new filename as [ %s ]' % (filename)
+            print '[*] Exist the file of same name, and change new filename as [%s]' % (filename)
         if not os.path.exists(filepath):
             os.makedirs(filepath)
-
     elif up and not down:
         if not os.path.isfile(filename):
-            print '[*] NO Such File!'
+            print '[*] NO cuch file!'
             exit()
 
 
@@ -81,20 +69,20 @@ def send_command():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((host, port))
     server.listen(lisnum)
-    print '[*] Set %d Listening on [ %s:%d ]' % (lisnum, host, port)
+    print '[*] Set %d Listening on [%s:%d]' % (lisnum, host, port)
 
     while True:
         client, addr = server.accept()
-        print '\n' + '-' * 102
-        print '[*] Accepted connection from [ %s:%d ]' % (addr[0], addr[1])
+        print '\n' + '-' * 93
+        print '[*] Accepted connection from [%s:%d]' % (addr[0], addr[1])
         request = client.recv(size)
         print request
-        print '[*] Input command lines, and type "Ctrl + Z" as end of input: '
+        print '[*] Input command lines, and type "Ctrl_D"(in Linux) or "Ctrl_Z"(in Windows) as end of input: '
         command = sys.stdin.read()
         try:
             handle_client(client, command)
         except:
-            print '[*] Failed to send command to [ %s:%d ]' % (addr[0], addr[1])
+            print '[*] Failed to send command to [%s:%d]' % (addr[0], addr[1])
 
 
 def upload_file():
@@ -104,11 +92,11 @@ def upload_file():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((host, port))
     server.listen(lisnum)
-    print '[*] Set %d Listening on [ %s:%d ]' % (lisnum, host, port)
+    print '[*] Set %d Listening on [%s:%d]' % (lisnum, host, port)
     # be connected by client
     client, addr = server.accept()
-    print '\n' + '-' * 102
-    print '[*] Accepted connection from [ %s:%d ]' % (addr[0], addr[1])
+    print '\n' + '-' * 93
+    print '[*] Accepted connection from [%s:%d]' % (addr[0], addr[1])
     # send the maxsize of file that will be uploaded
     msize = os.path.getsize(filename)
     while True:
@@ -117,7 +105,7 @@ def upload_file():
             break
         except:
             pass
-    print '[*] Plan to upload %ld bytes file named [ %s ] to it' % (msize, filename)
+    print '[*] Plan to upload %ld bytes file named [%s] to it' % (msize, filename)
     # start to upload
     with open(filename, 'rb') as f:
         for data in f:
@@ -137,14 +125,14 @@ def download_file():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((host, port))
     server.listen(lisnum)
-    print '[*] Set %d Listening on [ %s:%d ]' % (lisnum, host, port)
+    print '[*] Set %d Listening on [%s:%d]' % (lisnum, host, port)
     # be connected by client
     client, addr = server.accept()
-    print '\n' + '-' * 102
-    print '[*] Accepted connection from [ %s:%d ]' % (addr[0], addr[1])
+    print '\n' + '-' * 93
+    print '[*] Accepted connection from [%s:%d]' % (addr[0], addr[1])
     # get the maxsize of file that will be downloaded
     msize = long(client.recv(size))
-    print '[*] Plan to download %ld bytes file as [ %s ] from it' % (msize, filename)
+    print '[*] Plan to download %ld bytes file as [%s] from it' % (msize, filename)
     while True:
         data = client.recv(size)
         if not data:
@@ -157,7 +145,7 @@ def download_file():
             str = '[' + '>' * int(80 * fsize / msize) + ' ' * int(80 - (80 * fsize / msize)) + ']'
             sys.stdout.write('\r' + str + ('[%3s%%]' % (100 * fsize / msize)))
             sys.stdout.flush()
-    print '\n[*] Success to download file as [ %s ]' % (filename)
+    print '\n[*] Success to download file as [%s]' % (filename)
 
 
 def main():
